@@ -108,11 +108,14 @@ class TextConditioner(BaseConditioner):
 
 
 class QwTokenizerConditioner(TextConditioner):
-    def __init__(self, output_dim: int, 
+    def __init__(self, output_dim: int,
                  token_path = "",
-                 max_len = 300, 
-                 add_token_list=[]): #""
+                 max_len = 300,
+                 add_token_list=[],
+                 version: str = 'v1'): #""
         from transformers import Qwen2Tokenizer
+        if version != 'v1':
+            add_token_list.append('.')
         self.text_tokenizer = Qwen2Tokenizer.from_pretrained(token_path)
         if add_token_list != []:
             self.text_tokenizer.add_tokens(add_token_list, special_tokens=True)        
@@ -655,7 +658,15 @@ class ClassifierFreeGuidanceDropoutInference(ClassifierFreeGuidanceDropout):
             sample.audio[condition] = self.get_null_wav(audio_cond.wav, sr=audio_cond.sample_rate[0])
         else:
             if customized is None:
-                sample.text[condition] = None
+                # v2: for type_info with musicality tags, use low-musicality as null condition
+                if condition in ['type_info'] and sample.text[condition] is not None:
+                    if "[Musicality-very-high]" in sample.text[condition]:
+                        sample.text[condition] = "[Musicality-very-low], ."
+                        print(f"cfg unconditioning: change sample.text[condition] to [Musicality-very-low]")
+                    else:
+                        sample.text[condition] = None
+                else:
+                    sample.text[condition] = None
             else:
                 text_cond = deepcopy(sample.text[condition])
                 if "structure" in customized:

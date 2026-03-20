@@ -144,12 +144,6 @@ class FL_SongGen_Generate:
         gen_type: str = "mixed",
         seed: int = -1
     ) -> Tuple[dict, dict, dict]:
-        # Check model is still loaded (may have been unloaded via Unload Models)
-        if model.get("model") is None:
-            raise RuntimeError(
-                "SongGen model was unloaded. Please re-run the Model Loader node (Queue Prompt again)."
-            )
-
         print(f"\n{'='*60}")
         print(f"[FL SongGen] Starting Generation")
         print(f"{'='*60}")

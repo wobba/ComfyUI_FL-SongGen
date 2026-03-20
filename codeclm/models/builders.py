@@ -110,6 +110,7 @@ def get_conditioner_provider(output_dim: int, cfg: omegaconf.DictConfig, version
         if model_type == 'QwTokenizer':
             conditioners[str(cond)] = QwTokenizerConditioner(
                 output_dim=output_dim,
+                version=version,
                 **model_args
             )
         elif model_type == "QwTextTokenizer":

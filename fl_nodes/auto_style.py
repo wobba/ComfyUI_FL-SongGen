@@ -145,13 +145,6 @@ class FL_SongGen_AutoStyle:
         gen_type: str = "mixed",
         seed: int = -1
     ) -> Tuple[dict, dict, dict]:
-        # Check model is still loaded
-        if model.get("model") is None:
-            raise RuntimeError(
-                "SongGen model was unloaded. Please re-run the Model Loader node (Queue Prompt again)."
-            )
-
-        # Map display label to internal value
         print(f"\n{'='*60}")
         print(f"[FL SongGen Auto Style] Starting Generation")
         print(f"{'='*60}")

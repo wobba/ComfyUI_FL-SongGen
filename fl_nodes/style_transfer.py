@@ -168,12 +168,6 @@ class FL_SongGen_StyleTransfer:
         Returns:
             (mixed_audio, vocal_audio, bgm_audio) as ComfyUI AUDIO dicts
         """
-        # Check model is still loaded
-        if model.get("model") is None:
-            raise RuntimeError(
-                "SongGen model was unloaded. Please re-run the Model Loader node (Queue Prompt again)."
-            )
-
         print(f"\n{'='*60}")
         print(f"[FL SongGen Style Transfer] Starting Generation")
         print(f"{'='*60}")

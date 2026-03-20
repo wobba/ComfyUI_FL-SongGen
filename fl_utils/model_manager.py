@@ -174,6 +174,8 @@ def clear_model_cache():
     print("[FL SongGen] Clearing model cache...")
     for key, model_info in cache.items():
         # Move all model components to CPU to free VRAM
+        # Do NOT set attrs to None — ComfyUI's execution cache may still hold
+        # this dict, and the wrapper can restore models to GPU on next run.
         for attr in ("audiolm", "audio_tokenizer", "separate_tokenizer", "model"):
             obj = model_info.get(attr)
             if obj is not None and hasattr(obj, "cpu"):
@@ -181,7 +183,6 @@ def clear_model_cache():
                     obj.cpu()
                 except Exception:
                     pass
-            model_info[attr] = None
         model_info["loaded"] = False
     cache.clear()
     gc.collect()
