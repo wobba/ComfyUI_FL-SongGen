@@ -162,10 +162,27 @@ def get_variant_info(variant: str) -> dict:
 
 
 def clear_model_cache():
-    """Clear all cached models and free memory."""
+    """Clear all cached models and free GPU memory.
+
+    Explicitly moves model components off GPU before clearing the cache dict,
+    so GPU memory is freed even if ComfyUI's execution cache still holds
+    a stale reference to the model_info dict.
+    """
     cache = _get_shared_cache()
-    if cache:
-        print("[FL SongGen] Clearing model cache...")
+    if not cache:
+        return
+    print("[FL SongGen] Clearing model cache...")
+    for key, model_info in cache.items():
+        # Move all model components to CPU to free VRAM
+        for attr in ("audiolm", "audio_tokenizer", "separate_tokenizer", "model"):
+            obj = model_info.get(attr)
+            if obj is not None and hasattr(obj, "cpu"):
+                try:
+                    obj.cpu()
+                except Exception:
+                    pass
+            model_info[attr] = None
+        model_info["loaded"] = False
     cache.clear()
     gc.collect()
     if torch.cuda.is_available():
