@@ -75,6 +75,15 @@ class SongGenWrapper:
         """Set callback for progress updates."""
         self._progress_callback = callback
 
+    @staticmethod
+    def _check_interrupt():
+        """Check if ComfyUI user requested cancellation and raise if so."""
+        try:
+            import comfy.model_management
+            comfy.model_management.throw_exception_if_processing_interrupted()
+        except ImportError:
+            pass
+
     def generate(
         self,
         lyrics: str,
@@ -195,6 +204,7 @@ class SongGenWrapper:
 
         # Set progress callback - pass through actual total from model
         def progress_wrapper(current, total):
+            self._check_interrupt()
             if self._progress_callback:
                 self._progress_callback(current, total)
 
@@ -396,6 +406,7 @@ class SongGenWrapper:
 
         # Set progress callback - pass through actual total from model
         def progress_wrapper(current, total):
+            self._check_interrupt()
             if self._progress_callback:
                 self._progress_callback(current, total)
 
@@ -662,6 +673,7 @@ class SongGenWrapper:
 
         # Set progress callback
         def progress_wrapper(current, total):
+            self._check_interrupt()
             if self._progress_callback:
                 self._progress_callback(current, total)
 
