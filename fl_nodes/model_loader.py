@@ -35,12 +35,14 @@ get_available_vram_gb = _model_manager.get_available_vram_gb
 set_keep_loaded = _model_manager.set_keep_loaded
 
 # Memory mode display labels → internal values
-MEMORY_MODES = ["Auto", "Normal", "Low VRAM", "Ultra Low VRAM"]
+# Includes old lowercase values for backward compatibility with saved workflows
+MEMORY_MODES = ["Auto", "Normal", "Low VRAM", "Ultra Low VRAM",
+                "auto", "normal", "low", "ultra_low_mem"]
 _MEMORY_MODE_MAP = {
-    "Auto": "auto",
-    "Normal": "normal",
-    "Low VRAM": "low",
-    "Ultra Low VRAM": "ultra",
+    "Auto": "auto", "auto": "auto",
+    "Normal": "normal", "normal": "normal",
+    "Low VRAM": "low", "low": "low",
+    "Ultra Low VRAM": "ultra", "ultra_low_mem": "ultra",
 }
 
 

@@ -118,7 +118,8 @@ class FL_SongGen_StyleTransfer:
                     }
                 ),
                 "gen_type": (
-                    ["Mixed", "Separate All", "Vocal Only", "BGM Only"],
+                    ["Mixed", "Separate All", "Vocal Only", "BGM Only",
+                     "mixed", "separate", "vocal", "bgm"],
                     {
                         "default": "Mixed",
                         "tooltip": "Mixed = combined song. Separate All = vocal + BGM + mixed tracks. Vocal/BGM Only = single track."
@@ -137,9 +138,12 @@ class FL_SongGen_StyleTransfer:
         }
 
     # Gen type display label → internal value
+    # Includes old lowercase values for backward compatibility with saved workflows
     _GEN_TYPE_MAP = {
-        "Mixed": "mixed", "Separate All": "separate",
-        "Vocal Only": "vocal", "BGM Only": "bgm",
+        "Mixed": "mixed", "mixed": "mixed",
+        "Separate All": "separate", "separate": "separate",
+        "Vocal Only": "vocal", "vocal": "vocal",
+        "BGM Only": "bgm", "bgm": "bgm",
     }
 
     def generate(

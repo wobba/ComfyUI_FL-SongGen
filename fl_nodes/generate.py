@@ -30,12 +30,14 @@ SongGenWrapper = _songgen_wrapper.SongGenWrapper
 empty_audio = _audio_utils.empty_audio
 
 # Gen type display labels → internal values
-GEN_TYPES = ["Mixed", "Separate All", "Vocal Only", "BGM Only"]
+# Includes old lowercase values for backward compatibility with saved workflows
+GEN_TYPES = ["Mixed", "Separate All", "Vocal Only", "BGM Only",
+             "mixed", "separate", "vocal", "bgm"]
 _GEN_TYPE_MAP = {
-    "Mixed": "mixed",
-    "Separate All": "separate",
-    "Vocal Only": "vocal",
-    "BGM Only": "bgm",
+    "Mixed": "mixed", "mixed": "mixed",
+    "Separate All": "separate", "separate": "separate",
+    "Vocal Only": "vocal", "vocal": "vocal",
+    "BGM Only": "bgm", "bgm": "bgm",
 }
 
 
