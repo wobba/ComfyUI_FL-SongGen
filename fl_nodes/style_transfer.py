@@ -177,6 +177,12 @@ class FL_SongGen_StyleTransfer:
         Returns:
             (mixed_audio, vocal_audio, bgm_audio) as ComfyUI AUDIO dicts
         """
+        # Check model is still loaded
+        if model.get("model") is None:
+            raise RuntimeError(
+                "SongGen model was unloaded. Please re-run the Model Loader node (Queue Prompt again)."
+            )
+
         # Map display label to internal value
         gen_type = self._GEN_TYPE_MAP.get(gen_type, gen_type.lower())
 

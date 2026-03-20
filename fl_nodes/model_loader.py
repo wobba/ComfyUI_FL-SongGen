@@ -60,6 +60,18 @@ class FL_SongGen_ModelLoader:
     CATEGORY = "FL Song Gen"
 
     @classmethod
+    def IS_CHANGED(cls, **kwargs):
+        # Force re-execution when model cache was cleared (e.g. after Unload Models)
+        try:
+            import comfy.model_management as cmm
+            cache = getattr(cmm, '_songgen_cache', {})
+            if not cache:
+                return float("nan")  # Always re-run when cache is empty
+        except ImportError:
+            pass
+        return ""
+
+    @classmethod
     def INPUT_TYPES(cls):
         variants = get_variant_list()
         return {

@@ -152,6 +152,12 @@ class FL_SongGen_Generate:
         gen_type: str = "Mixed",
         seed: int = -1
     ) -> Tuple[dict, dict, dict]:
+        # Check model is still loaded (may have been unloaded via Unload Models)
+        if model.get("model") is None:
+            raise RuntimeError(
+                "SongGen model was unloaded. Please re-run the Model Loader node (Queue Prompt again)."
+            )
+
         # Map display label to internal value
         internal_gen_type = _GEN_TYPE_MAP.get(gen_type, gen_type.lower())
 
