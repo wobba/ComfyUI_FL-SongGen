@@ -381,12 +381,22 @@ class LlamaAttention(nn.Module):
         # Use optimized attention when enabled via config
         _attn_backend = getattr(self.config, "_attn_backend", "manual")  # "sdpa" or "manual"
         if _attn_backend == "sdpa" and not output_attentions:
-            attn_output = F.scaled_dot_product_attention(
-                query_states, key_states, value_states,
-                attn_mask=attention_mask,
-                dropout_p=0.0,
-                is_causal=False,  # mask already includes causality
-            )
+            # The attention mask from this model is always purely causal (no padding, no
+            # special patterns). We can bypass the additive mask and use SDPA's native
+            # causal mode, which enables fused Flash Attention / Memory Efficient kernels.
+            # - q_len == 1 (streaming/generation): single query attends to full KV cache,
+            #   no mask needed at all
+            # - q_len > 1 (prefill): is_causal=True applies causal pattern in fused kernel
+            if q_len == 1:
+                attn_output = F.scaled_dot_product_attention(
+                    query_states, key_states, value_states,
+                    dropout_p=0.0, is_causal=False,
+                )
+            else:
+                attn_output = F.scaled_dot_product_attention(
+                    query_states, key_states, value_states,
+                    dropout_p=0.0, is_causal=True,
+                )
         else:
             attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
 

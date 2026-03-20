@@ -154,6 +154,11 @@ class SongGenWrapper:
     ) -> Tuple[dict, Optional[dict], Optional[dict]]:
         """Normal generation mode (sufficient VRAM)."""
         model = self.model_info["model"]
+
+        # Ensure LM is on GPU (may have been offloaded to CPU after previous decode)
+        if self.device == "cuda" and not next(model.lm.parameters()).is_cuda:
+            print(f"[FL SongGen] Moving LM back to GPU...")
+            model.lm.to(torch.float16).cuda()
         audio_tokenizer = self.model_info.get("audio_tokenizer")
         separate_tokenizer = self.model_info.get("separate_tokenizer")
 
@@ -220,6 +225,19 @@ class SongGenWrapper:
         with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.device == "cuda"):
             with torch.no_grad():
                 tokens = model.generate(**generate_inp, return_tokens=True)
+
+        # Offload LM to CPU before audio decoding if VRAM is tight.
+        # The LM (~13GB) is no longer needed — only the separate_tokenizer (VAE) decodes tokens.
+        # On high-VRAM cards (32GB+), skip offload to avoid ~7s transfer overhead.
+        import gc
+        vram_free = 0
+        if torch.cuda.is_available():
+            vram_free = (torch.cuda.get_device_properties(0).total_memory - torch.cuda.memory_reserved(0)) / 1024**3
+        if vram_free < 8:
+            model.lm.cpu()
+            gc.collect()
+            torch.cuda.empty_cache()
+            print(f"[FL SongGen] LM offloaded to CPU (VRAM was tight: {vram_free:.1f}GB free)")
 
         # Generate audio from tokens
         print(f"[FL SongGen] Decoding audio...")
