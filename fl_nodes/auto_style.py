@@ -86,11 +86,11 @@ class FL_SongGen_AutoStyle:
                 "temperature": (
                     "FLOAT",
                     {
-                        "default": 0.9,
+                        "default": 1.0,
                         "min": 0.1,
                         "max": 2.0,
                         "step": 0.05,
-                        "tooltip": "Sampling temperature (higher = more random)"
+                        "tooltip": "Sampling temperature. 1.0 = balanced (official default). Lower = more consistent, higher = more creative."
                     }
                 ),
                 "cfg_coef": (
@@ -100,7 +100,7 @@ class FL_SongGen_AutoStyle:
                         "min": 0.5,
                         "max": 5.0,
                         "step": 0.1,
-                        "tooltip": "Classifier-free guidance strength"
+                        "tooltip": "Classifier-free guidance. 1.5 = official default. Higher = stronger adherence to lyrics/description."
                     }
                 ),
                 "top_k": (
@@ -108,16 +108,16 @@ class FL_SongGen_AutoStyle:
                     {
                         "default": 50,
                         "min": 1,
-                        "max": 500,
+                        "max": 5000,
                         "step": 10,
-                        "tooltip": "Top-k sampling (lower = more focused)"
+                        "tooltip": "Top-k sampling. 50 = focused (official default). Higher values (500-5000) = more diverse/experimental."
                     }
                 ),
                 "gen_type": (
-                    ["mixed", "separate", "vocal", "bgm"],
+                    ["Mixed", "Separate All", "Vocal Only", "BGM Only"],
                     {
-                        "default": "mixed",
-                        "tooltip": "Output type: mixed, separate (all tracks), vocal only, or bgm only"
+                        "default": "Mixed",
+                        "tooltip": "Mixed = combined song. Separate All = vocal + BGM + mixed tracks. Vocal/BGM Only = single track."
                     }
                 ),
                 "seed": (
@@ -132,35 +132,27 @@ class FL_SongGen_AutoStyle:
             }
         }
 
+    # Gen type display label → internal value
+    _GEN_TYPE_MAP = {
+        "Mixed": "mixed", "Separate All": "separate",
+        "Vocal Only": "vocal", "BGM Only": "bgm",
+    }
+
     def generate(
         self,
         model: dict,
         lyrics: str,
         auto_style: str,
         duration: float = 60.0,
-        temperature: float = 0.9,
+        temperature: float = 1.0,
         cfg_coef: float = 1.5,
         top_k: int = 50,
-        gen_type: str = "mixed",
+        gen_type: str = "Mixed",
         seed: int = -1
     ) -> Tuple[dict, dict, dict]:
-        """
-        Generate song using preset auto-style prompts.
+        # Map display label to internal value
+        gen_type = self._GEN_TYPE_MAP.get(gen_type, gen_type.lower())
 
-        Args:
-            model: Loaded model info dict
-            lyrics: Formatted lyrics with section tags
-            auto_style: Preset style name
-            duration: Target duration in seconds
-            temperature: Sampling temperature
-            cfg_coef: Classifier-free guidance strength
-            top_k: Top-k sampling parameter
-            gen_type: Output type (mixed, separate, vocal, bgm)
-            seed: Random seed
-
-        Returns:
-            (mixed_audio, vocal_audio, bgm_audio) as ComfyUI AUDIO dicts
-        """
         print(f"\n{'='*60}")
         print(f"[FL SongGen Auto Style] Starting Generation")
         print(f"{'='*60}")

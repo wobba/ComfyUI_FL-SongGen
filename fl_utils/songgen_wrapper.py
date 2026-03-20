@@ -229,15 +229,21 @@ class SongGenWrapper:
         # Offload LM to CPU before audio decoding if VRAM is tight.
         # The LM (~13GB) is no longer needed — only the separate_tokenizer (VAE) decodes tokens.
         # On high-VRAM cards (32GB+), skip offload to avoid ~7s transfer overhead.
+        # Also check system RAM can hold the model before offloading.
         import gc
+        import psutil
         vram_free = 0
         if torch.cuda.is_available():
             vram_free = (torch.cuda.get_device_properties(0).total_memory - torch.cuda.memory_reserved(0)) / 1024**3
         if vram_free < 8:
-            model.lm.cpu()
-            gc.collect()
-            torch.cuda.empty_cache()
-            print(f"[FL SongGen] LM offloaded to CPU (VRAM was tight: {vram_free:.1f}GB free)")
+            ram_free_gb = psutil.virtual_memory().available / 1024**3
+            if ram_free_gb > 16:
+                model.lm.cpu()
+                gc.collect()
+                torch.cuda.empty_cache()
+                print(f"[FL SongGen] LM offloaded to CPU (VRAM free: {vram_free:.1f}GB, RAM free: {ram_free_gb:.0f}GB)")
+            else:
+                print(f"[FL SongGen] Skipping LM offload (not enough RAM: {ram_free_gb:.0f}GB free, need 16GB+)")
 
         # Generate audio from tokens
         print(f"[FL SongGen] Decoding audio...")
