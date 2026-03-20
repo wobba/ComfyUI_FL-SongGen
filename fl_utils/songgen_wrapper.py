@@ -335,7 +335,7 @@ class SongGenWrapper:
         # Phase 2: Generate tokens with LM
         print("[FL SongGen LowMem] Loading language model...")
         audiolm = builders.get_lm_model(cfg)
-        checkpoint = torch.load(ckpt_path, map_location='cpu')
+        checkpoint = torch.load(ckpt_path, map_location='cpu', mmap=True)
         audiolm_state_dict = {
             k.replace('audiolm.', ''): v
             for k, v in checkpoint.items()
@@ -346,7 +346,10 @@ class SongGenWrapper:
         audiolm = self._resize_embeddings_for_checkpoint(audiolm, audiolm_state_dict)
 
         audiolm.load_state_dict(audiolm_state_dict, strict=False)
-        audiolm = audiolm.eval().cuda().to(torch.float16)
+        del audiolm_state_dict
+        del checkpoint
+        gc.collect()
+        audiolm = audiolm.eval().to(torch.float16).cuda()
 
         model = CodecLM(
             name="tmp",
@@ -402,7 +405,6 @@ class SongGenWrapper:
         del model
         audiolm = audiolm.cpu()
         del audiolm
-        del checkpoint
         gc.collect()
         torch.cuda.empty_cache()
 
@@ -581,7 +583,7 @@ class SongGenWrapper:
 
         # Load checkpoint - keep on CPU
         print("[FL SongGen UltraLowMem] Loading checkpoint...")
-        checkpoint = torch.load(ckpt_path, map_location='cpu')
+        checkpoint = torch.load(ckpt_path, map_location='cpu', mmap=True)
         audiolm_state_dict = {
             k.replace('audiolm.', ''): v
             for k, v in checkpoint.items()
