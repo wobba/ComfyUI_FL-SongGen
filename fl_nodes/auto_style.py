@@ -109,7 +109,7 @@ class FL_SongGen_AutoStyle:
                         "default": 50,
                         "min": 1,
                         "max": 5000,
-                        "step": 10,
+                        "step": 1,
                         "tooltip": "Top-k sampling. 50 = focused (official default). Higher values (500-5000) = more diverse/experimental."
                     }
                 ),

@@ -133,6 +133,24 @@ class SongGenWrapper:
         lyrics = LYRICS_FILTER_REGEX.sub("", lyrics)
         lyrics = re.sub(r"\s+", " ", lyrics)  # Normalize multiple spaces to single space
 
+        # v2 description preprocessing - official SongGeneration v2 requires special tags
+        variant = self.model_info.get("variant", "")
+        is_v2 = "v2" in variant
+        if is_v2 and description is not None:
+            description = description.lower()
+            if gen_type == "bgm":
+                description = "[Musicality-very-high], [Pure-Music], " + description
+            else:
+                description = "[Musicality-very-high], " + description
+            print(f"[FL SongGen] v2 description: {description[:100]}")
+        elif is_v2 and description is None:
+            # v2 needs at least the musicality tag even without user description
+            if gen_type == "bgm":
+                description = "[Musicality-very-high], [Pure-Music]"
+            else:
+                description = "[Musicality-very-high]"
+            print(f"[FL SongGen] v2 description (auto): {description}")
+
         if self.ultra_low_mem:
             return self._generate_ultra_lowmem(
                 lyrics, description, prompt_audio, auto_style,

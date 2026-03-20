@@ -10,13 +10,13 @@ from typing import Tuple
 _PARAM_GUIDE = {
     "songgeneration_v2_large": {
         "name": "v2-large",
-        "temperature": "1.0 (official default)",
+        "temperature": "0.8 (official default)",
         "cfg_coef": "1.5 (official default)",
-        "top_k": "50 (focused) or 5000 (creative/experimental)",
+        "top_k": "5000 (official default)",
         "max_duration": "270s (4m30s)",
         "languages": "Chinese, English, Spanish, Japanese, Korean, French, German, Portuguese, Italian, Russian",
         "vram": "28GB normal / 22GB low VRAM",
-        "notes": "Best quality. Multilingual. Use description for style control (gender, genre, emotion, instruments).",
+        "notes": "Best quality. Multilingual. [Musicality-very-high] tag auto-prepended to description.",
     },
     "songgeneration_v1_5_beta": {
         "name": "v1.5-beta",
