@@ -118,11 +118,10 @@ class FL_SongGen_StyleTransfer:
                     }
                 ),
                 "gen_type": (
-                    ["Mixed", "Separate All", "Vocal Only", "BGM Only",
-                     "mixed", "separate", "vocal", "bgm"],
+                    ["mixed", "separate", "vocal", "bgm"],
                     {
-                        "default": "Mixed",
-                        "tooltip": "Mixed = combined song. Separate All = vocal + BGM + mixed tracks. Vocal/BGM Only = single track."
+                        "default": "mixed",
+                        "tooltip": "mixed = combined song. separate = vocal + BGM + mixed tracks. vocal/bgm = single track."
                     }
                 ),
                 "seed": (
@@ -137,14 +136,6 @@ class FL_SongGen_StyleTransfer:
             }
         }
 
-    # Gen type display label → internal value
-    # Includes old lowercase values for backward compatibility with saved workflows
-    _GEN_TYPE_MAP = {
-        "Mixed": "mixed", "mixed": "mixed",
-        "Separate All": "separate", "separate": "separate",
-        "Vocal Only": "vocal", "vocal": "vocal",
-        "BGM Only": "bgm", "bgm": "bgm",
-    }
 
     def generate(
         self,
@@ -156,7 +147,7 @@ class FL_SongGen_StyleTransfer:
         temperature: float = 1.0,
         cfg_coef: float = 1.5,
         top_k: int = 50,
-        gen_type: str = "Mixed",
+        gen_type: str = "mixed",
         seed: int = -1
     ) -> Tuple[dict, dict, dict]:
         """
@@ -182,9 +173,6 @@ class FL_SongGen_StyleTransfer:
             raise RuntimeError(
                 "SongGen model was unloaded. Please re-run the Model Loader node (Queue Prompt again)."
             )
-
-        # Map display label to internal value
-        gen_type = self._GEN_TYPE_MAP.get(gen_type, gen_type.lower())
 
         print(f"\n{'='*60}")
         print(f"[FL SongGen Style Transfer] Starting Generation")

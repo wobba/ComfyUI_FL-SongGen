@@ -386,7 +386,8 @@ class SongGenWrapper:
 
         # Phase 2: Generate tokens with LM
         print("[FL SongGen LowMem] Loading language model...")
-        audiolm = builders.get_lm_model(cfg)
+        version = 'v2' if 'v2' in self.model_info.get('variant', '') else 'v1'
+        audiolm = builders.get_lm_model(cfg, version=version)
         checkpoint = torch.load(ckpt_path, map_location='cpu', mmap=True)
         audiolm_state_dict = {
             k.replace('audiolm.', ''): v
@@ -632,7 +633,8 @@ class SongGenWrapper:
             print(f"[FL SongGen UltraLowMem] Pre-LM VRAM: {allocated:.2f}GB")
 
         # Build LM on CPU first
-        audiolm = builders.get_lm_model(cfg)
+        version = 'v2' if 'v2' in self.model_info.get('variant', '') else 'v1'
+        audiolm = builders.get_lm_model(cfg, version=version)
 
         # Load checkpoint - keep on CPU
         print("[FL SongGen UltraLowMem] Loading checkpoint...")

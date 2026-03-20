@@ -200,15 +200,21 @@ class QwTokenizerConditioner(TextConditioner):
 
 class QwTextConditioner(TextConditioner):
     def __init__(self, output_dim: int,
-                 token_path = "", 
-                 max_len = 300): #""
-        
+                 token_path = "",
+                 max_len = 300,
+                 version = 'v1'): #""
+
         from transformers import Qwen2Tokenizer
-        self.text_tokenizer = Qwen2Tokenizer.from_pretrained(token_path)    
-        voc_size = len(self.text_tokenizer.get_vocab())         
+        self.text_tokenizer = Qwen2Tokenizer.from_pretrained(token_path)
+        # v2 adds special conditioning tokens for musicality control
+        if version != 'v1':
+            v2_tokens = ['[Musicality-very-high]', '[Pure-Music]', '.']
+            self.text_tokenizer.add_tokens(v2_tokens, special_tokens=True)
+            print(f"[QwTextConditioner] Added v2 tokens: {v2_tokens}")
+        voc_size = len(self.text_tokenizer.get_vocab())
         # here initialize a output_proj (nn.Embedding) layer
-        super().__init__(voc_size, output_dim, input_token=True, padding_idx=151643) 
-        
+        super().__init__(voc_size, output_dim, input_token=True, padding_idx=151643)
+
         self.max_len = max_len
         
     def tokenize(self, x: tp.List[tp.Optional[str]]) -> tp.Dict[str, torch.Tensor]:

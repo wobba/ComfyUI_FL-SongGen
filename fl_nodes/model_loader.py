@@ -34,16 +34,8 @@ get_recommended_memory_mode = _model_manager.get_recommended_memory_mode
 get_available_vram_gb = _model_manager.get_available_vram_gb
 set_keep_loaded = _model_manager.set_keep_loaded
 
-# Memory mode display labels → internal values
-# Includes old lowercase values for backward compatibility with saved workflows
-MEMORY_MODES = ["Auto", "Normal", "Low VRAM", "Ultra Low VRAM",
-                "auto", "normal", "low", "ultra_low_mem"]
-_MEMORY_MODE_MAP = {
-    "Auto": "auto", "auto": "auto",
-    "Normal": "normal", "normal": "normal",
-    "Low VRAM": "low", "low": "low",
-    "Ultra Low VRAM": "ultra", "ultra_low_mem": "ultra",
-}
+# Memory modes
+MEMORY_MODES = ["auto", "normal", "low", "ultra_low_mem"]
 
 
 class FL_SongGen_ModelLoader:
@@ -88,8 +80,8 @@ class FL_SongGen_ModelLoader:
                 "memory_mode": (
                     MEMORY_MODES,
                     {
-                        "default": "Auto",
-                        "tooltip": "Auto picks the best mode for your GPU. Normal = fastest. Low VRAM = offloads between phases. Ultra Low = minimum ~6GB VRAM."
+                        "default": "auto",
+                        "tooltip": "auto picks the best mode for your GPU. normal = fastest. low = offloads between phases. ultra_low_mem = minimum ~6GB VRAM."
                     }
                 ),
                 "force_reload": (
@@ -112,20 +104,17 @@ class FL_SongGen_ModelLoader:
     def load_model(
         self,
         model_variant: str,
-        memory_mode: str = "Auto",
+        memory_mode: str = "auto",
         force_reload: bool = False,
         keep_model_loaded: bool = True,
     ) -> Tuple[dict]:
-        # Map display label to internal value
-        internal_mode = _MEMORY_MODE_MAP.get(memory_mode, memory_mode.lower())
-
         # Resolve memory mode
-        if internal_mode == "auto":
+        if memory_mode == "auto":
             resolved_mode = get_recommended_memory_mode(model_variant)
             available_vram = get_available_vram_gb()
             print(f"[FL SongGen] Auto-detected memory mode: {resolved_mode} (available VRAM: {available_vram:.1f}GB)")
         else:
-            resolved_mode = internal_mode
+            resolved_mode = memory_mode
 
         # Map mode to flags
         low_mem = resolved_mode in ("low", "ultra_low_mem", "low_mem")

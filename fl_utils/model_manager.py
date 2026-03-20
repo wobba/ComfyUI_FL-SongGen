@@ -627,7 +627,8 @@ def _load_full_model(
 
     # Load LM
     print("[FL SongGen] Loading language model...")
-    audiolm = builders.get_lm_model(cfg)
+    version = 'v2' if 'v2' in model_info.get('variant', '') else 'v1'
+    audiolm = builders.get_lm_model(cfg, version=version)
     checkpoint = torch.load(str(ckpt_path), map_location='cpu', mmap=True)
     audiolm_state_dict = {
         k.replace('audiolm.', ''): v

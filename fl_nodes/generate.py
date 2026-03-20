@@ -29,16 +29,8 @@ _audio_utils = _import_from_package("audio_utils", "audio_utils")
 SongGenWrapper = _songgen_wrapper.SongGenWrapper
 empty_audio = _audio_utils.empty_audio
 
-# Gen type display labels → internal values
-# Includes old lowercase values for backward compatibility with saved workflows
-GEN_TYPES = ["Mixed", "Separate All", "Vocal Only", "BGM Only",
-             "mixed", "separate", "vocal", "bgm"]
-_GEN_TYPE_MAP = {
-    "Mixed": "mixed", "mixed": "mixed",
-    "Separate All": "separate", "separate": "separate",
-    "Vocal Only": "vocal", "vocal": "vocal",
-    "BGM Only": "bgm", "bgm": "bgm",
-}
+# Gen types
+GEN_TYPES = ["mixed", "separate", "vocal", "bgm"]
 
 
 class FL_SongGen_Generate:
@@ -124,8 +116,8 @@ class FL_SongGen_Generate:
                 "gen_type": (
                     GEN_TYPES,
                     {
-                        "default": "Mixed",
-                        "tooltip": "Mixed = combined song. Separate All = vocal + BGM + mixed tracks. Vocal/BGM Only = single track."
+                        "default": "mixed",
+                        "tooltip": "mixed = combined song. separate = vocal + BGM + mixed tracks. vocal/bgm = single track."
                     }
                 ),
                 "seed": (
@@ -149,7 +141,7 @@ class FL_SongGen_Generate:
         temperature: float = 1.0,
         cfg_coef: float = 1.5,
         top_k: int = 50,
-        gen_type: str = "Mixed",
+        gen_type: str = "mixed",
         seed: int = -1
     ) -> Tuple[dict, dict, dict]:
         # Check model is still loaded (may have been unloaded via Unload Models)
@@ -158,9 +150,6 @@ class FL_SongGen_Generate:
                 "SongGen model was unloaded. Please re-run the Model Loader node (Queue Prompt again)."
             )
 
-        # Map display label to internal value
-        internal_gen_type = _GEN_TYPE_MAP.get(gen_type, gen_type.lower())
-
         print(f"\n{'='*60}")
         print(f"[FL SongGen] Starting Generation")
         print(f"{'='*60}")
@@ -168,7 +157,7 @@ class FL_SongGen_Generate:
         print(f"Temperature: {temperature}")
         print(f"CFG: {cfg_coef}")
         print(f"Top-K: {top_k}")
-        print(f"Gen Type: {internal_gen_type}")
+        print(f"Gen Type: {gen_type}")
         print(f"Seed: {seed}")
         print(f"Description: {description[:50]}..." if description else "Description: None")
         print(f"Lyrics: {lyrics[:50]}...")
@@ -206,7 +195,7 @@ class FL_SongGen_Generate:
                 temperature=temperature,
                 cfg_coef=cfg_coef,
                 top_k=top_k,
-                gen_type=internal_gen_type,
+                gen_type=gen_type,
                 seed=seed,
             )
 
@@ -217,7 +206,7 @@ class FL_SongGen_Generate:
             print(f"\n{'='*60}")
             print(f"[FL SongGen] Generation Complete!")
             print(f"Mixed Audio: {mixed_audio['waveform'].shape}, {mixed_audio['sample_rate']}Hz")
-            if internal_gen_type == 'separate':
+            if gen_type == 'separate':
                 print(f"Vocal Audio: {vocal_audio['waveform'].shape}")
                 print(f"BGM Audio: {bgm_audio['waveform'].shape}")
             print(f"{'='*60}\n")
